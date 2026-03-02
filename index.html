@@ -1076,7 +1076,7 @@
   </div>
   <p class="contact-text animate">Have an idea? Let's talk about turning it into a product.</p>
   <div class="contact-links animate">
-    <a href="/cdn-cgi/l/email-protection#c1b5aeacacb881b2a8b9a8b2efb2b5b4a5a8ae" class="contact-link"><span class="label">email</span> <span class="__cf_email__" data-cfemail="5b2f343636221b283223322875282f2e3f3234">[email&#160;protected]</span></a>
+    <a href="mailto:tommy@sixis.studio" class="contact-link"><span class="label">email</span> tommy@sixis.studio</a>
     <a href="tel:+12146165243" class="contact-link"><span class="label">phone</span> (214) 616-5243</a>
     <a href="https://www.linkedin.com/in/thanhho" target="_blank" class="contact-link"><span class="label">linkedin</span> /in/thanhho</a>
   </div>
@@ -1092,7 +1092,7 @@
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
   // Intersection Observer for scroll animations
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, index) => {
@@ -1207,4 +1207,12 @@
     new google.translate.TranslateElement({
       pageLanguage: 'en',
       includedLanguages: 'en,es,fr,de,pt,zh-CN,ko,vi,ar,hi,ja,it,ru,tr,th,sv,pl,nl,uk,id,ms,tl,ro,cs,el,hu,da,fi,no,he',
-      layout: google
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>
