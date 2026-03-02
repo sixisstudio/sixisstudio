@@ -861,7 +861,7 @@
         </div>
         <button class="lang-show-more" id="langShowMore">More languages ↓</button>
       </div>
-      <div id="google_translate_element" style="display:none;"></div>
+      <div id="google_translate_element" style="position:absolute;left:-9999px;opacity:0;pointer-events:none;"></div>
     </div>
   </div>
 </nav>
@@ -1057,13 +1057,15 @@
 
   // Trigger Google Translate when a language is clicked
   function setGoogleTranslate(langCode) {
-    // Wait for Google Translate to be ready
     const check = setInterval(() => {
-      const sel = document.querySelector('#google_translate_element select');
+      const sel = document.querySelector('.goog-te-combo');
       if (sel) {
         clearInterval(check);
         sel.value = langCode;
-        sel.dispatchEvent(new Event('change'));
+        // Use the native setter to trigger Google's listener
+        const nativeSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
+        nativeSetter.call(sel, langCode);
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
       }
     }, 100);
   }
@@ -1081,22 +1083,20 @@
 
       // Trigger Google Translate
       if (lang === 'en') {
-        // Reset to English
-        const frame = document.querySelector('.goog-te-banner-frame');
-        if (frame) {
-          const btn = frame.contentDocument.querySelector('.goog-close-link');
-          if (btn) btn.click();
-        }
-        // Fallback: reload without hash
-        const sel = document.querySelector('#google_translate_element select');
+        // Reset to English via cookie and reload
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+        const sel = document.querySelector('.goog-te-combo');
         if (sel) {
           sel.value = 'en';
-          sel.dispatchEvent(new Event('change'));
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
         }
-        // Cookie reset fallback
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.sixis.studio';
+        // Fallback: reload page
+        setTimeout(() => { location.reload(); }, 500);
       } else {
+        // Set cookie for immediate translation
+        document.cookie = 'googtrans=/en/' + lang + '; path=/;';
+        document.cookie = 'googtrans=/en/' + lang + '; path=/; domain=.' + location.hostname;
         setGoogleTranslate(lang);
       }
     });
