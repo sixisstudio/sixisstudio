@@ -86,6 +86,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
     z-index: 100;
     background: rgba(10, 10, 10, 0.8);
     backdrop-filter: blur(20px);
@@ -129,6 +130,38 @@
     text-decoration: none;
     letter-spacing: 0.5px;
     transition: color 0.3s;
+  }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 300;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text-dim);
+    border-radius: 1px;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+
+  .hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+
+  .hamburger.open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(4px, -4px);
   }
 
   .nav-links a:hover {
@@ -781,9 +814,31 @@
   /* ============= RESPONSIVE ============= */
   @media (max-width: 768px) {
     nav { padding: 16px 20px; }
-    .nav-links { gap: 16px; }
-    .nav-links a { font-size: 11px; }
-    .nav-right { gap: 16px; }
+    .hamburger { display: flex; }
+    .nav-links {
+      display: none;
+      position: fixed;
+      top: 60px;
+      left: 0;
+      right: 0;
+      background: #0a0a0a;
+      border-bottom: 1px solid var(--border);
+      flex-direction: column;
+      padding: 8px 24px;
+      gap: 0;
+      z-index: 199;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links li { list-style: none; }
+    .nav-links a {
+      font-size: 14px;
+      display: block;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-links li:last-child a { border-bottom: none; }
+    .nav-right { gap: 12px; }
+    .lang-dropdown { right: -12px; }
 
     .hero { padding: 100px 24px 80px; }
     .hero::before, .hero::after { display: none; }
@@ -813,7 +868,10 @@
     <span class="bracket">}</span>
   </a>
   <div class="nav-right">
-    <ul class="nav-links">
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
       <li><a href="#work">Work</a></li>
       <li><a href="#founder">Founder</a></li>
       <li><a href="#portfolio">Portfolio</a></li>
@@ -1028,6 +1086,24 @@
 
   document.querySelectorAll('.animate').forEach(el => observer.observe(el));
 
+  // Hamburger menu
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
+
+  hamburger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hamburger.classList.toggle('open');
+    navLinks.classList.toggle('open');
+  });
+
+  // Close menu when a nav link is clicked
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      navLinks.classList.remove('open');
+    });
+  });
+
   // Language dropdown
   const langToggle = document.getElementById('langToggle');
   const langDropdown = document.getElementById('langDropdown');
@@ -1043,6 +1119,8 @@
 
   document.addEventListener('click', () => {
     langDropdown.classList.remove('open');
+    hamburger.classList.remove('open');
+    navLinks.classList.remove('open');
   });
 
   langDropdown.addEventListener('click', (e) => {
