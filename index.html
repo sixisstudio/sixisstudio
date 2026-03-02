@@ -1055,21 +1055,7 @@
     langShowMore.textContent = expanded ? 'Fewer languages ↑' : 'More languages ↓';
   });
 
-  // Trigger Google Translate when a language is clicked
-  function setGoogleTranslate(langCode) {
-    const check = setInterval(() => {
-      const sel = document.querySelector('.goog-te-combo');
-      if (sel) {
-        clearInterval(check);
-        sel.value = langCode;
-        // Use the native setter to trigger Google's listener
-        const nativeSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
-        nativeSetter.call(sel, langCode);
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    }, 100);
-  }
-
+  // Trigger Google Translate via cookie + reload
   document.querySelectorAll('.lang-option').forEach(btn => {
     btn.addEventListener('click', () => {
       const lang = btn.dataset.lang;
@@ -1081,26 +1067,40 @@
       langCurrent.textContent = label;
       langDropdown.classList.remove('open');
 
-      // Trigger Google Translate
       if (lang === 'en') {
-        // Reset to English via cookie and reload
+        // Clear translation cookies and reload
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
-        const sel = document.querySelector('.goog-te-combo');
-        if (sel) {
-          sel.value = 'en';
-          sel.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        // Fallback: reload page
-        setTimeout(() => { location.reload(); }, 500);
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.sixis.studio';
+        location.reload();
       } else {
-        // Set cookie for immediate translation
+        // Set translation cookie and reload
         document.cookie = 'googtrans=/en/' + lang + '; path=/;';
         document.cookie = 'googtrans=/en/' + lang + '; path=/; domain=.' + location.hostname;
-        setGoogleTranslate(lang);
+        location.reload();
       }
     });
   });
+
+  // On page load, check cookie and update button label
+  (function() {
+    const match = document.cookie.match(/googtrans=\/en\/([a-z\-]+)/i);
+    if (match) {
+      const lang = match[1];
+      const btn = document.querySelector('.lang-option[data-lang="' + lang + '"]');
+      if (btn) {
+        document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        langCurrent.textContent = btn.textContent;
+        // Show "more" section if selected lang is in there
+        if (btn.closest('#langMore')) {
+          langMore.style.display = 'block';
+          langShowMore.textContent = 'Fewer languages ↑';
+          expanded = true;
+        }
+      }
+    }
+  })();
 
   // Google Translate init
   function googleTranslateElementInit() {
