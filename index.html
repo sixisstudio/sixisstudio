@@ -135,6 +135,132 @@
     color: var(--green);
   }
 
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  /* ============= LANGUAGE DROPDOWN ============= */
+  .lang-wrapper {
+    position: relative;
+  }
+
+  .lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    transition: border-color 0.3s, color 0.3s;
+  }
+
+  .lang-toggle:hover {
+    border-color: rgba(0, 229, 160, 0.3);
+    color: var(--green);
+  }
+
+  .lang-toggle svg {
+    opacity: 0.6;
+  }
+
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 180px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    display: none;
+    z-index: 200;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+
+  .lang-dropdown::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .lang-dropdown::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+  }
+
+  .lang-dropdown.open {
+    display: block;
+  }
+
+  .lang-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    color: var(--text-dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .lang-option:hover {
+    background: rgba(0, 229, 160, 0.08);
+    color: var(--text);
+  }
+
+  .lang-option.active {
+    color: var(--green);
+  }
+
+  .lang-show-more {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+    padding: 10px 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .lang-show-more:hover {
+    color: var(--green);
+  }
+
+  .lang-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--green);
+    z-index: 9999;
+    animation: loadingBar 2s ease-in-out infinite;
+  }
+
+  @keyframes loadingBar {
+    0% { width: 0; opacity: 1; }
+    50% { width: 70%; opacity: 1; }
+    100% { width: 100%; opacity: 0; }
+  }
+
   /* ============= HERO ============= */
   .hero {
     min-height: 100vh;
@@ -663,8 +789,10 @@
   /* ============= RESPONSIVE ============= */
   @media (max-width: 768px) {
     nav { padding: 16px 20px; }
-    .nav-links { gap: 20px; }
-    .nav-links a { font-size: 12px; }
+    .nav-links { gap: 16px; }
+    .nav-links a { font-size: 11px; }
+    .nav-right { gap: 16px; }
+    .lang-dropdown { width: 160px; }
 
     .hero { padding: 100px 24px 80px; }
     .hero::before, .hero::after { display: none; }
@@ -693,12 +821,57 @@
     <span class="text">SiXiS</span>
     <span class="bracket">}</span>
   </a>
-  <ul class="nav-links">
-    <li><a href="#work">Work</a></li>
-    <li><a href="#founder">Founder</a></li>
-    <li><a href="#portfolio">Portfolio</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#founder">Founder</a></li>
+      <li><a href="#portfolio">Portfolio</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="lang-wrapper">
+      <button class="lang-toggle" id="langToggle" aria-label="Change language">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span class="lang-current" id="langCurrent">EN</span>
+      </button>
+      <div class="lang-dropdown" id="langDropdown">
+        <div class="lang-list" id="langList">
+          <button class="lang-option active" data-lang="en" data-label="English">English</button>
+          <button class="lang-option" data-lang="es" data-label="Spanish">Español</button>
+          <button class="lang-option" data-lang="zh" data-label="Chinese">中文</button>
+          <button class="lang-option" data-lang="hi" data-label="Hindi">हिन्दी</button>
+          <button class="lang-option" data-lang="ar" data-label="Arabic">العربية</button>
+          <button class="lang-option" data-lang="pt" data-label="Portuguese">Português</button>
+          <button class="lang-option" data-lang="fr" data-label="French">Français</button>
+          <button class="lang-option" data-lang="ja" data-label="Japanese">日本語</button>
+          <button class="lang-option" data-lang="ko" data-label="Korean">한국어</button>
+          <button class="lang-option" data-lang="de" data-label="German">Deutsch</button>
+        </div>
+        <div class="lang-more-list" id="langMoreList" style="display:none;">
+          <button class="lang-option" data-lang="ru" data-label="Russian">Русский</button>
+          <button class="lang-option" data-lang="it" data-label="Italian">Italiano</button>
+          <button class="lang-option" data-lang="tr" data-label="Turkish">Türkçe</button>
+          <button class="lang-option" data-lang="vi" data-label="Vietnamese">Tiếng Việt</button>
+          <button class="lang-option" data-lang="th" data-label="Thai">ไทย</button>
+          <button class="lang-option" data-lang="pl" data-label="Polish">Polski</button>
+          <button class="lang-option" data-lang="nl" data-label="Dutch">Nederlands</button>
+          <button class="lang-option" data-lang="uk" data-label="Ukrainian">Українська</button>
+          <button class="lang-option" data-lang="sv" data-label="Swedish">Svenska</button>
+          <button class="lang-option" data-lang="id" data-label="Indonesian">Bahasa Indonesia</button>
+          <button class="lang-option" data-lang="ms" data-label="Malay">Bahasa Melayu</button>
+          <button class="lang-option" data-lang="tl" data-label="Filipino">Filipino</button>
+          <button class="lang-option" data-lang="he" data-label="Hebrew">עברית</button>
+          <button class="lang-option" data-lang="cs" data-label="Czech">Čeština</button>
+          <button class="lang-option" data-lang="ro" data-label="Romanian">Română</button>
+          <button class="lang-option" data-lang="da" data-label="Danish">Dansk</button>
+          <button class="lang-option" data-lang="fi" data-label="Finnish">Suomi</button>
+          <button class="lang-option" data-lang="el" data-label="Greek">Ελληνικά</button>
+          <button class="lang-option" data-lang="hu" data-label="Hungarian">Magyar</button>
+          <button class="lang-option" data-lang="no" data-label="Norwegian">Norsk</button>
+        </div>
+        <button class="lang-show-more" id="langShowMore">Show all languages ↓</button>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -852,7 +1025,6 @@
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, index) => {
       if (entry.isIntersecting) {
-        // Stagger animations within same section
         const siblings = entry.target.parentElement.querySelectorAll('.animate');
         const i = Array.from(siblings).indexOf(entry.target);
         entry.target.style.animationDelay = `${i * 0.15}s`;
@@ -863,6 +1035,150 @@
   }, { threshold: 0.1 });
 
   document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+  // ============= LANGUAGE TRANSLATION =============
+  const langToggle = document.getElementById('langToggle');
+  const langDropdown = document.getElementById('langDropdown');
+  const langCurrent = document.getElementById('langCurrent');
+  const langShowMore = document.getElementById('langShowMore');
+  const langMoreList = document.getElementById('langMoreList');
+  let showingAll = false;
+  let translationCache = {};
+  let originalTexts = {};
+  let currentLang = 'en';
+
+  // Store original English text on load
+  const translatableSelectors = [
+    '.hero-tagline', '.hero-sub', '.hero-cta a',
+    '.section-label', '.section-title', '.section-text',
+    '.service-card h3', '.service-card p',
+    '.portfolio-tag', '.portfolio-card h3', '.portfolio-card .tagline',
+    '.stat-label', '.feature-cell .feat-text',
+    '.portfolio-link',
+    '.contact-text',
+    '.contact-link .label',
+    'footer .copy',
+    '.scroll-hint',
+    '.studio-text',
+    '.nav-links a'
+  ];
+
+  function getTranslatableElements() {
+    const elements = [];
+    translatableSelectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => elements.push(el));
+    });
+    return elements;
+  }
+
+  // Save originals
+  getTranslatableElements().forEach((el, i) => {
+    originalTexts[i] = el.innerHTML;
+  });
+
+  // Toggle dropdown
+  langToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langDropdown.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    langDropdown.classList.remove('open');
+  });
+
+  langDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Show more languages
+  langShowMore.addEventListener('click', () => {
+    showingAll = !showingAll;
+    langMoreList.style.display = showingAll ? 'block' : 'none';
+    langShowMore.textContent = showingAll ? 'Show fewer languages ↑' : 'Show all languages ↓';
+  });
+
+  // Handle language selection
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const lang = btn.dataset.lang;
+      const label = btn.dataset.label;
+      if (lang === currentLang) return;
+
+      // Update active state
+      document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      langCurrent.textContent = lang.toUpperCase();
+      currentLang = lang;
+      langDropdown.classList.remove('open');
+
+      // If English, restore originals
+      if (lang === 'en') {
+        getTranslatableElements().forEach((el, i) => {
+          el.innerHTML = originalTexts[i];
+        });
+        return;
+      }
+
+      // Check cache
+      if (translationCache[lang]) {
+        applyTranslations(translationCache[lang]);
+        return;
+      }
+
+      // Show loading bar
+      const loader = document.createElement('div');
+      loader.className = 'lang-loading';
+      document.body.appendChild(loader);
+
+      try {
+        // Collect all text to translate
+        const textsToTranslate = {};
+        getTranslatableElements().forEach((el, i) => {
+          textsToTranslate[i] = originalTexts[i];
+        });
+
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 4000,
+            messages: [{
+              role: "user",
+              content: `Translate the following JSON values to ${label}. Keep all HTML tags exactly as they are. Do not translate brand names (SiXiS, ValueBet, TowMarX, VB Coins, Polymarket, Supabase). Do not translate email addresses, phone numbers, URLs, or tech terms in tags. Return ONLY a valid JSON object with the same keys and translated values. No markdown, no backticks, no explanation.\n\n${JSON.stringify(textsToTranslate)}`
+            }]
+          })
+        });
+
+        const data = await response.json();
+        const text = data.content.map(c => c.text || '').join('');
+        const cleaned = text.replace(/```json|```/g, '').trim();
+        const translations = JSON.parse(cleaned);
+
+        translationCache[lang] = translations;
+        applyTranslations(translations);
+      } catch (err) {
+        console.error('Translation error:', err);
+        // Revert to English on error
+        document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-lang="en"]').classList.add('active');
+        langCurrent.textContent = 'EN';
+        currentLang = 'en';
+      } finally {
+        loader.remove();
+      }
+    });
+  });
+
+  function applyTranslations(translations) {
+    const elements = getTranslatableElements();
+    Object.keys(translations).forEach(key => {
+      const i = parseInt(key);
+      if (elements[i]) {
+        elements[i].innerHTML = translations[key];
+      }
+    });
+  }
 </script>
 
 </body>
