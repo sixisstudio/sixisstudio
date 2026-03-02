@@ -141,47 +141,99 @@
     gap: 24px;
   }
 
-  /* ============= GOOGLE TRANSLATE ============= */
+  /* ============= LANGUAGE GLOBE ============= */
   .lang-wrapper {
     position: relative;
   }
 
-  #google_translate_element select {
-    background: transparent;
+  .lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 6px 12px;
     color: var(--text-dim);
+    cursor: pointer;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    outline: none;
     transition: border-color 0.3s, color 0.3s;
   }
 
-  #google_translate_element select:hover {
+  .lang-toggle:hover {
     border-color: rgba(0, 229, 160, 0.3);
     color: var(--green);
   }
 
+  .lang-toggle svg {
+    opacity: 0.6;
+  }
+
+  .lang-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    display: none;
+    z-index: 200;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    min-width: 180px;
+  }
+
+  .lang-dropdown.open {
+    display: block;
+  }
+
+  /* Style Google Translate widget inside dropdown */
   #google_translate_element .goog-te-gadget {
     font-size: 0;
     color: transparent;
+    margin: 0;
   }
 
   #google_translate_element .goog-te-gadget > span {
     display: none;
   }
 
-  .goog-te-banner-frame, .skiptranslate iframe {
+  #google_translate_element .goog-te-gadget img {
+    display: none;
+  }
+
+  #google_translate_element select,
+  #google_translate_element .goog-te-combo {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 4px 0;
+    color: var(--text-dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  #google_translate_element select option,
+  #google_translate_element .goog-te-combo option {
+    background: #111;
+    color: #ccc;
+    padding: 8px;
+  }
+
+  /* Hide Google Translate top bar and attribution */
+  .goog-te-banner-frame,
+  .skiptranslate iframe,
+  #goog-gt-tt,
+  .goog-te-balloon-frame {
     display: none !important;
   }
 
   body { top: 0 !important; }
-
-  .goog-te-gadget img { display: none; }
 
   .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none; }
 
@@ -752,7 +804,13 @@
       <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="lang-wrapper">
-      <div id="google_translate_element"></div>
+      <button class="lang-toggle" id="langToggle" aria-label="Change language">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span class="lang-current" id="langCurrent">EN</span>
+      </button>
+      <div class="lang-dropdown" id="langDropdown">
+        <div id="google_translate_element"></div>
+      </div>
     </div>
   </div>
 </nav>
@@ -919,7 +977,74 @@
 
   document.querySelectorAll('.animate').forEach(el => observer.observe(el));
 
-  // Google Translate
+  // Globe dropdown toggle
+  const langToggle = document.getElementById('langToggle');
+  const langDropdown = document.getElementById('langDropdown');
+  const langCurrent = document.getElementById('langCurrent');
+
+  langToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langDropdown.classList.toggle('open');
+    // Auto-open the Google Translate select
+    setTimeout(() => {
+      const sel = document.querySelector('#google_translate_element select');
+      if (sel) {
+        sel.size = sel.options.length;
+        sel.style.maxHeight = '300px';
+        sel.style.overflowY = 'auto';
+      }
+    }, 100);
+  });
+
+  document.addEventListener('click', () => {
+    langDropdown.classList.remove('open');
+  });
+
+  langDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Watch for language changes and update globe label
+  const langMap = {
+    'af':'AF','sq':'SQ','am':'AM','ar':'AR','hy':'HY','az':'AZ','eu':'EU','be':'BE','bn':'BN','bs':'BS',
+    'bg':'BG','ca':'CA','ceb':'CEB','zh-CN':'ZH','zh-TW':'ZH','co':'CO','hr':'HR','cs':'CS','da':'DA',
+    'nl':'NL','en':'EN','eo':'EO','et':'ET','fi':'FI','fr':'FR','fy':'FY','gl':'GL','ka':'KA','de':'DE',
+    'el':'EL','gu':'GU','ht':'HT','ha':'HA','haw':'HAW','he':'HE','hi':'HI','hmn':'HMN','hu':'HU',
+    'is':'IS','ig':'IG','id':'ID','ga':'GA','it':'IT','ja':'JA','jv':'JV','kn':'KN','kk':'KK','km':'KM',
+    'rw':'RW','ko':'KO','ku':'KU','ky':'KY','lo':'LO','la':'LA','lv':'LV','lt':'LT','lb':'LB','mk':'MK',
+    'mg':'MG','ms':'MS','ml':'ML','mt':'MT','mi':'MI','mr':'MR','mn':'MN','my':'MY','ne':'NE','no':'NO',
+    'ny':'NY','or':'OR','ps':'PS','fa':'FA','pl':'PL','pt':'PT','pa':'PA','ro':'RO','ru':'RU','sm':'SM',
+    'gd':'GD','sr':'SR','st':'ST','sn':'SN','sd':'SD','si':'SI','sk':'SK','sl':'SL','so':'SO','es':'ES',
+    'su':'SU','sw':'SW','sv':'SV','tl':'TL','tg':'TG','ta':'TA','tt':'TT','te':'TE','th':'TH','tr':'TR',
+    'tk':'TK','uk':'UK','ur':'UR','ug':'UG','uz':'UZ','vi':'VI','cy':'CY','xh':'XH','yi':'YI','yo':'YO',
+    'zu':'ZU'
+  };
+
+  // Monitor Google Translate select for changes
+  setInterval(() => {
+    const sel = document.querySelector('#google_translate_element select');
+    if (sel) {
+      const val = sel.value;
+      if (val && langMap[val]) {
+        langCurrent.textContent = langMap[val];
+      } else if (!val || val === 'en') {
+        langCurrent.textContent = 'EN';
+      }
+    }
+  }, 500);
+
+  // Close dropdown when a language is selected
+  const observeSelect = setInterval(() => {
+    const sel = document.querySelector('#google_translate_element select');
+    if (sel) {
+      sel.addEventListener('change', () => {
+        setTimeout(() => { langDropdown.classList.remove('open'); }, 300);
+      });
+      clearInterval(observeSelect);
+    }
+  }, 500);
+
+  // Google Translate init
   function googleTranslateElementInit() {
     new google.translate.TranslateElement({
       pageLanguage: 'en',
